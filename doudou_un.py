@@ -15,8 +15,10 @@ breakpoint = ForkedPdb().set_trace
 
 class CountDownToEvent:
     def __init__(self):
-        self.event_name = ''
-        self.days_count = 0
+        self.file_name = 'event_data/ev_list.txt'
+        self.f = open(self.file_name, 'r', encoding='utf8')
+        self.event_lst = self.f.readlines()
+        self.events_dct = {self.event_lst[i].split('|')[0]:self.event_lst[i].split('|')[1] for i in range(len(self.event_lst))}
     
     def addEvent(self, event_name):
         self.event_name = event_name
@@ -27,52 +29,72 @@ class CountDownToEvent:
         self.date_mm = int(self.event_date[4:6])
         self.date_dd = int(self.event_date[-2:])
 
-    def loadFile(self):
-        self.event_date = self.f.readline().split('|')[1]
-        self.date_yy = int(self.event_date[:4])
-        self.date_mm = int(self.event_date[4:6])
-        self.date_dd = int(self.event_date[-2:])
-        self.event_name = self.f.readline().split('|')[0]
+    def showEvents(self):
+        self.ev_num = len(self.event_lst)
+        print(f"\n[MESSAGE] You have {self.ev_num} event(s).", "\n----------\n", *self.event_lst, "----------")
 
-    def writeData(self, file_name=None):
-        self.file_name = f'{self.event_name}.txt'
-        self.f = open(self.file_name, 'w', encoding='utf8')
-        self.f.write(f'{self.event_name}|')
-        self.f.write(str(self.event_date))
+    def loadEvent(self):
+        while True:
+            event_name = input(f"Your events (case-sensitive): ")
+            try:
+                if event_name in self.events_dct:
+                    self.event_name = event_name
+                    self.event_date = self.events_dct[event_name]
+                    self.date_yy = int(self.event_date[:4])
+                    self.date_mm = int(self.event_date[4:6])
+                    self.date_dd = int(self.event_date[-2:])
+                    break
+                elif event_name in 'Qq':
+                    break
+                else:
+                    print("Sorry, invalid event name...")
+                    continue
+            except:
+                continue
 
-    def inquireEvent(self):
-        self.file_name = input('Event name: ')
-        self.f = open(f'{self.file_name}.txt', 'r', encoding='utf8')
-    
+    def writeData(self):
+        self.f = open(self.file_name, 'a+', encoding='utf8')
+        if self.event_name in [self.event_lst[i][0] for i in range(len(self.event_lst))]:
+            print(f"Sorry, the event '{self.event_name}' already exists.")
+        else:
+            self.f.write(f'{self.event_name}|')
+            self.f.write(str(f'{self.event_date}\n'))
+
     def requestData(self):
         self.d_day = datetime.date(year=self.date_yy, month=self.date_mm, day=self.date_dd)
         days_delta = abs(datetime.date.today() - self.d_day)
-    
-        print(days_delta.days, 'days left until', self.event_name)
+        os.system('clear')
+        print(days_delta.days, 'DAYS LEFT UNTIL', self.event_name, '\nKEEP IT UP!\n----------')
 
 
 ###
 
-# with open('event_list.txt', encoding='utf8'):
 while True:
 
     os.system('clear')
     usr_input = input("1) Create event \n2) Request D-day count \nAny other input to quit > ")
 
     if usr_input == '1':
-        ev = CountDownToEvent()
+        ev = CountDownToEvent()  # create instance
         ev.addEvent(input("Event name: "))
         ev.addDate(input("Event date (YYYYMMDD): "))
-        ev.writeData("File name before '.txt' (optional): ")
-        ev.requestData()
-        pas = input('Press enter > ')
+        ev.writeData()
+        os.system('clear')
+        ev.f.close()
+        ev.__init__()
+        ev.showEvents()
+        continu = input('Press enter to continue > ')
 
     elif usr_input == '2':
         ev = CountDownToEvent()
-        ev.inquireEvent()
-        ev.loadFile()
-        ev.requestData()
-        pas = input('Press enter > ')
+        os.system('clear')
+        ev.showEvents()
+        ev.loadEvent()
+        if ev.event_name in ev.events_dct:
+            ev.requestData()
+        else:
+            continue
+        continu = input('Press enter to continue> ')
 
     else:
         break
