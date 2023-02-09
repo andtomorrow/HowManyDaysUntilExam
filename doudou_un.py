@@ -32,6 +32,7 @@ class CountDownToEvent:
         self.date_yy = int(self.event_date[:4])
         self.date_mm = int(self.event_date[4:6])
         self.date_dd = int(self.event_date[-2:])
+        self.event_name = self.f.readline().split('|')[0]
 
     def writeData(self, file_name=None):
         self.file_name = f'{self.event_name}.txt'
