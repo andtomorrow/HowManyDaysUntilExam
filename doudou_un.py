@@ -83,6 +83,7 @@ while True:
         ev.f.close()
         ev.__init__()
         ev.showEvents()
+        ev.f.close()
         continu = input('Press enter to continue > ')
 
     elif usr_input == '2':
@@ -94,9 +95,8 @@ while True:
             ev.requestData()
         else:
             continue
+        ev.f.close()
         continu = input('Press enter to continue> ')
 
     else:
         break
-
-    ev.f.close()
